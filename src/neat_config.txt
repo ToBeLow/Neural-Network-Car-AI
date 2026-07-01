@@ -1,0 +1,111 @@
+[NEAT]
+# highest fitness genome = winner, typical
+fitness_criterion     = max
+# set high so we always run all gens
+fitness_threshold     = 100000
+# number of genomes (cars) per generation
+pop_size              = 100
+# if all species die out, restart with a fresh population instead of crashing
+reset_on_extinction   = True
+# if True, never stop on fitness_threshold — we use the threshold so keep this False
+no_fitness_termination = False
+
+[DefaultGenome]
+# tanh has the best outputs [-1,1] for rotation/speed bounds
+activation_default      = tanh
+# don't mutate activation functions — we always want tanh
+activation_mutate_rate  = 0.0
+# the only allowed activation (relevant if mutate_rate > 0)
+activation_options      = tanh
+
+# how a node combines all its incoming signals before applying activation
+# standard weighted sum of inputs
+aggregation_default     = sum
+# don't mutate aggregation — sum is always correct here
+aggregation_mutate_rate = 0.0
+# only option allowed
+aggregation_options     = sum
+
+# each node has a learnable bias, mutated like a weight
+# start biases centered at 0 with some spread so early networks aren't all identical
+bias_init_mean          = 0.0
+bias_init_stdev         = 1.0
+# hard clamp to prevent exploding values
+bias_max_value          = 30.0
+bias_min_value          = -30.0
+# std dev of the Gaussian noise added when mutating a bias
+bias_mutate_power       = 0.3
+# lowered for finer tuning — cars already solve the track, we're refining
+bias_mutate_rate        = 0.5
+# small probability to replace the bias with a fresh random value for randomness
+bias_replace_rate       = 0.1
+
+# NEAT measures genome distance to decide which species a genome belongs to
+# weight of structural differences (missing connections/nodes)
+compatibility_disjoint_coefficient = 1.0
+# weight of weight differences in matching genes
+compatibility_weight_coefficient   = 0.5
+
+# probability of adding/removing a connection each generation
+conn_add_prob           = 0.3
+conn_delete_prob        = 0.3
+# new connections start enabled
+enabled_default         = True
+# small chance a connection gets toggled on/off
+enabled_mutate_rate     = 0.01
+
+# no recurrent connections — keeps behaviour deterministic per frame
+feed_forward            = True
+# generation 0: every input connected to every output (minimal but complete)
+initial_connection      = full
+
+# probability of inserting/removing a hidden node
+node_add_prob           = 0.1
+node_delete_prob        = 0.2
+# start with no hidden nodes — NEAT grows complexity only if it helps
+num_hidden              = 0
+# one per radar
+num_inputs              = 9
+# delta_angle, delta_speed
+num_outputs             = 2
+
+# a per-node multiplier: output = activation(response * sum + bias)
+# fixed at 1.0 (no effect) so it doesn't add unnecessary degrees of freedom
+response_init_mean      = 1.0
+response_init_stdev     = 0.0
+response_max_value      = 30.0
+response_min_value      = -30.0
+response_mutate_power   = 0.0
+response_mutate_rate    = 0.0
+response_replace_rate   = 0.0
+
+# start weights centered at 0 with spread so genomes differ from the start
+weight_init_mean        = 0.0
+weight_init_stdev       = 1.0
+# hard clamp
+weight_max_value        = 30
+weight_min_value        = -30
+# std dev of Gaussian noise when nudging a weight
+weight_mutate_power     = 0.3
+# lowered for finer tuning — cars already solve the track
+weight_mutate_rate      = 0.6
+# chance of full replacement instead of nudge
+weight_replace_rate     = 0.1
+
+[DefaultSpeciesSet]
+# genomes further apart than this become separate species
+compatibility_threshold = 3.0
+
+[DefaultStagnation]
+# a species' fitness = its best member's fitness
+species_fitness_func = max
+# kill a species if it hasn't improved in 15 generations
+max_stagnation       = 15
+# always keep the 2 best species alive regardless of stagnation
+species_elitism      = 2
+
+[DefaultReproduction]
+# carry the top 3 genomes of each species unchanged into the next generation
+elitism            = 3
+# only the top 25% of each species get to reproduce
+survival_threshold = 0.25
